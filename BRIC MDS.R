@@ -2,7 +2,7 @@
 
 library(tidyverse)
 set.seed(123)
-
+library(sf)
 
 
 finaldf = read.csv("/Volumes/SD Drive/Geo Data/BRIC ALL DATA.csv")
@@ -248,6 +248,9 @@ bricall = social %>%
   mutate(across(where(is.numeric), ~ (.- min(.)) / (max(.) - min(.)))) %>%
   mutate(finalscore = rowSums(select(.,socialscore:enviscore)))
 
+summary(bricall$finalscore)
+sd(bricall$finalscore)
+
 # Top and Bottom 10 Municipalities ####
 top_10 <- bricall %>%
   arrange(desc(finalscore)) %>%  
@@ -277,11 +280,6 @@ gem = gb2023 %>% mutate(AANT_INW = na_if(AANT_INW,-99999999)) %>% drop_na() %>%
   select(GM_NAAM,GM_CODE)
 rm(gb2023)
 
-bric 
-
-## Social Score ####
-score = social %>% inner_join(bricall,by=join_by(GM_NAAM,GM_CODE))
-
 ## Overall BRIC Score ####
 bric = gem %>% 
   inner_join(social,by=join_by(GM_NAAM,GM_CODE)) %>% 
@@ -291,9 +289,23 @@ bric = gem %>%
   inner_join(comm,by=join_by(GM_NAAM,GM_CODE)) %>% 
   inner_join(envi,by=join_by(GM_NAAM,GM_CODE)) 
 
-
 bricall = bricall %>% select(GM_NAAM,GM_CODE,finalscore)
 bric = bric %>% inner_join(bricall,by=join_by(GM_NAAM,GM_CODE))
+
+get_specific_stats <- function(x) {
+  c(
+    Min = min(x, na.rm = TRUE),
+    Median = median(x, na.rm = TRUE),
+    Mean = mean(x, na.rm = TRUE),
+    Max = max(x, na.rm = TRUE),
+    SD = sd(x, na.rm = TRUE)  # Calculate standard deviation
+  )
+}
+
+bricstats = bric %>% select(socialscore:finalscore) %>% st_drop_geometry()
+specific_stats <- sapply(bricstats, get_specific_stats)
+
+write.csv(specific_stats,"bricsummary.csv")
 
 spatial_df <- st_as_sf(bric, coords = c("lon", "lat"), crs = 28992)
 st_write(spatial_df, "GEO BRIC FINAL.geojson", append = F)
