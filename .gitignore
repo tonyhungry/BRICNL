@@ -4,3 +4,4 @@
 # But not these!
 !.gitignore
 !*.R
+.Rproj.user

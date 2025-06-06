@@ -1,6 +1,9 @@
 # BRIC ALL - Merging All data sets together
+
 # Min-Max Transformation
 # Inverse Orientation
+# Correlation
+# Spatial Autocorrelation
 
 library(tidyverse)
 library(corrplot)
@@ -19,7 +22,7 @@ infra <- read.csv("/Volumes/SD Drive/Geo Data/BRIC INFRA DATA.csv")
 infra = infra %>% select(-X)
 comm <- read.csv("/Volumes/SD Drive/Geo Data/BRIC COMM DATA.csv")
 comm = comm %>% select(-X)
-envi <- read.csv("/Volumes/SD Drive/Geo Data/BRIC ENVI DATA.csv")
+envi <- read.csv("/Volumes/SD Drive/Geo Data/BRIC NL/BRIC ENVI DATA.csv")
 envi = envi %>% select(-X)
 
 gb2023 <- read_sf("/Volumes/SD Drive/Geo Data/CBS Buurt:W:G Data/2023WijkBuurtkaart_2023_v1/gemeenten_2023_V1.shp")

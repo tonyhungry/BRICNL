@@ -49,8 +49,9 @@ colnames(energy)[1] = "GM_NAAM"
 
 df = df %>% left_join(energy,by=join_by(GM_NAAM))
 rm(energy)
+
 ## Land Use data ####
-land <- readxl::read_excel("land use per gem.xlsx")
+land <- readxl::read_excel("/Volumes/SD Drive/Geo Data/land use per gem.xlsx")
 
 df = df %>% left_join(land,by=join_by(GM_NAAM,GM_CODE))
 
@@ -63,15 +64,28 @@ rm(land)
 # df = df %>% left_join(urban_heat_effect_per_gem,by=join_by(GM_NAAM,GM_CODE))
 # rm(urban_heat_effect_per_gem)
 
-maximum_flood_depth_per_gem <- readxl::read_excel("maximum flood depth per gem.xlsx")
+### Flood ####
+maximum_flood_depth_per_gem <- readxl::read_excel("/Volumes/SD Drive/Geo Data/maximum flood depth per gem.xlsx")
 colnames(maximum_flood_depth_per_gem)[3] = "flood"
 
 df = df %>% left_join(maximum_flood_depth_per_gem,by=join_by(GM_NAAM,GM_CODE)) %>% 
   st_drop_geometry() %>% select(-OPP_LAND)
 rm(maximum_flood_depth_per_gem)
 
+### Wind and Hail ####
 
-colnames(df) = c("GM_NAAM","GM_CODE","LAND","GREENSPEND","WASTESPEND","GAS","ELEC","BUFFER","OPENSPACE","CULTIVATE","FLOOD")
+windhail = read_sf("/Volumes/SD Drive/Geo Data/BRIC NL/WindHaildata.geojson")
+
+df = df %>% left_join(windhail,by=join_by(GM_NAAM,GM_CODE)) %>% 
+  st_drop_geometry()
+
+rm(windhail)
+
+# Combine it all ####
+colnames(df)[1:13] = c("GM_NAAM","GM_CODE","LAND","GREENSPEND","WASTESPEND","GAS","ELEC","BUFFER","OPENSPACE","CULTIVATE","FLOOD","HAIL","WIND")
+
+ready = st_as_sf(df) %>% st_drop_geometry()
+
 write.csv(df,"BRIC ENVI DATA.csv")
 
 # Calculation and Graphs ####
